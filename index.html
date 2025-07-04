@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LN Clock - London, New York, India</title>
+  <style>
+    body {
+      font-family: 'Tahoma', 'Arial', sans-serif;
+      background: url('https://images2.alphacoders.com/941/941898.jpg') no-repeat center center fixed;
+      color: #000000;
+      padding: 0;
+      margin: 0;
+      border: 2px solid #0054e3;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    
+    .window {
+      background: #ece9d8;
+      border: 1px solid #003c74;
+      border-top-color: #ffffff;
+      border-left-color: #ffffff;
+      box-shadow: 1px 1px 0px #003c74;
+      margin: 10px;
+    }
+    
+    .title-bar {
+      background: linear-gradient(to right, #0058e6, #4b8cf0);
+      color: white;
+      padding: 4px 8px;
+      font-weight: bold;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #003c74;
+      user-select: none;
+    }
+    
+    .title-bar-buttons {
+      display: flex;
+    }
+    
+    .title-bar-button {
+      width: 16px;
+      height: 14px;
+      margin-left: 2px;
+      background: #ece9d8;
+      border: 1px solid #003c74;
+      border-top-color: #ffffff;
+      border-left-color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: black;
+      cursor: default;
+    }
+    
+    .window-content {
+      padding: 12px;
+      background: #ece9d8;
+    }
+    
+    h1 {
+      color: #003399;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+    }
+    
+    .header-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 11px;
+      color: #000000;
+      background: #ffffff;
+      padding: 4px 8px;
+      border: 1px solid #003c74;
+      border-top-color: #ffffff;
+      border-left-color: #ffffff;
+    }
+    
+    .clock-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      background: #ffffff;
+      padding: 12px;
+      border: 1px solid #003c74;
+      border-top-color: #ffffff;
+      border-left-color: #ffffff;
+    }
+    
+    .clock-row {
+      display: flex;
+      align-items: center;
+      position: relative;
+      padding: 8px 0;
+      border-bottom: 1px solid #c0c0c0;
+    }
+    
+    .clock-row:last-child {
+      border-bottom: none;
+    }
+    
+    .label {
+      width: 200px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .location-name {
+      font-size: 12px;
+      font-weight: bold;
+      color: #000000;
+    }
+    
+    .time-info {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-top: 2px;
+    }
+    
+    .timeline {
+      display: flex;
+      flex: 1;
+      height: 40px;
+      position: relative;
+      background: #ffffff;
+      border: 1px solid #003c74;
+      border-top-color: #ffffff;
+      border-left-color: #ffffff;
+    }
+    
+    .hour {
+      width: 60px;
+      border-right: 1px solid #c0c0c0;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+    }
+    
+    .hour-label {
+      position: absolute;
+      top: -16px;
+      font-size: 10px;
+      color: #000000;
+    }
+    
+    .dst-indicator {
+      font-size: 10px;
+      color: #003399;
+      font-weight: bold;
+    }
+    
+    .digital-clock {
+      font-size: 12px;
+      color: #000000;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+    }
+    
+    .date-display {
+      font-size: 10px;
+      color: #000000;
+      margin-top: 2px;
+    }
+    
+    .highlight {
+      background-color: #316ac5;
+      color: white;
+    }
+    
+    .time-indicator {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #ff0000;
+      z-index: 2;
+    }
+    
+    .indicator-circle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: #ff0000;
+      border-radius: 50%;
+      top: -4px;
+      left: -3px;
+    }
+    
+    .time-difference {
+      font-size: 10px;
+      color: #000000;
+      margin-left: 8px;
+    }
+    
+    .day-night {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 0;
+      opacity: 0.2;
+    }
+    
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    
+    button {
+      background: linear-gradient(to bottom, #ece9d8, #d7d3c4);
+      color: black;
+      border: 1px solid #003c74;
+      border-top-color: #ffffff;
+      border-left-color: #ffffff;
+      padding: 4px 12px;
+      font-size: 11px;
+      cursor: pointer;
+      min-width: 80px;
+      height: 22px;
+    }
+    
+    button:hover {
+      background: linear-gradient(to bottom, #ffffff, #e7e4d5);
+    }
+    
+    button:active {
+      border: 1px solid #003c74;
+      border-top-color: #003c74;
+      border-left-color: #003c74;
+      background: #d7d3c4;
+    }
+    
+    .timezone-selector {
+      margin-bottom: 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 11px;
+    }
+    
+    select {
+      padding: 3px;
+      border-radius: 0;
+      background: white;
+      color: black;
+      border: 1px solid #003c74;
+      border-top-color: #ffffff;
+      border-left-color: #ffffff;
+      font-size: 11px;
+      height: 22px;
+    }
+    
+    .analog-clock {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: white;
+      position: relative;
+      margin-left: 12px;
+      display: none;
+      border: 1px solid #003c74;
+      border-top-color: #ffffff;
+      border-left-color: #ffffff;
+    }
+    
+    .analog-hour, .analog-minute, .analog-second {
+      position: absolute;
+      transform-origin: bottom center;
+      left: 50%;
+      bottom: 50%;
+    }
+    
+    .analog-hour {
+      width: 3px;
+      height: 20px;
+      background: black;
+      margin-left: -1.5px;
+    }
+    
+    .analog-minute {
+      width: 2px;
+      height: 28px;
+      background: #003399;
+      margin-left: -1px;
+    }
+    
+    .analog-second {
+      width: 1px;
+      height: 30px;
+      background: #ff0000;
+      margin-left: -0.5px;
+    }
+    
+    .analog-center {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: #ff0000;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      margin: -3px 0 0 -3px;
+    }
+    
+    .time-arrow {
+      position: absolute;
+      height: 2px;
+      background: #ff0000;
+      top: 50%;
+      left: 0;
+      transform-origin: left center;
+      z-index: 3;
+    }
+    
+    .session-block {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      background: rgba(0, 170, 0, 0.2);
+      border: 1px dashed rgb(0, 150, 0);
+      z-index: 1;
+    }
+    
+    @media (max-width: 768px) {
+      .clock-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .label {
+        width: 100%;
+        margin-bottom: 8px;
+      }
+      
+      .timeline {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="window">
+    <div class="title-bar">
+      <div>LN Clock - London, New York, India</div>
+      <div class="title-bar-buttons">
+        <div class="title-bar-button">_</div>
+        <div class="title-bar-button">□</div>
+        <div class="title-bar-button">X</div>
+      </div>
+    </div>
+    
+    <div class="window-content">
+      <h1>LN Clock</h1>
+      
+      <div class="header-info">
+        <div id="local-time">Your local time: <span id="local-time-display"></span></div>
+        <div id="update-time">Last updated: <span id="last-updated"></span></div>
+      </div>
+
+      <div class="timezone-selector">
+        <label for="timezone-select">Add Timezone:</label>
+        <select id="timezone-select">
+          <option value="">Select a timezone</option>
+          <option value="Asia/Tokyo">Tokyo</option>
+          <option value="Australia/Sydney">Sydney</option>
+          <option value="Europe/Paris">Paris</option>
+          <option value="America/Los_Angeles">Los Angeles</option>
+          <option value="Asia/Dubai">Dubai</option>
+        </select>
+        <button id="add-timezone">Add</button>
+      </div>
+
+      <div class="clock-container" id="clocks-container">
+        <!-- London -->
+        <div class="clock-row" id="london-row">
+          <div class="label">
+            <div class="location-name">London</div>
+            <div class="time-info">
+              <span class="dst-indicator">BST (UTC+1)</span>
+              <span class="digital-clock" id="london-time"></span>
+              <span class="time-difference" id="london-diff"></span>
+            </div>
+            <div class="date-display" id="london-date"></div>
+          </div>
+          <div class="timeline" id="london-timeline">
+            <div class="day-night" id="london-daynight"></div>
+            <div class="hour">12<div class="hour-label">AM</div></div>
+            <div class="hour">1</div><div class="hour">2</div>
+            <div class="hour">3</div><div class="hour">4</div><div class="hour">5</div>
+            <div class="hour">6<div class="hour-label">AM</div></div>
+            <div class="hour">7</div><div class="hour">8</div>
+            <div class="hour">9</div><div class="hour">10</div><div class="hour">11</div>
+            <div class="hour">12<div class="hour-label">PM</div></div>
+            <div class="time-indicator" id="london-indicator">
+              <div class="indicator-circle"></div>
+              <div class="time-arrow" id="london-arrow"></div>
+            </div>
+          </div>
+          <div class="analog-clock" id="london-analog">
+            <div class="analog-hour" id="london-hour"></div>
+            <div class="analog-minute" id="london-minute"></div>
+            <div class="analog-second" id="london-second"></div>
+            <div class="analog-center"></div>
+          </div>
+        </div>
+
+        <!-- New York -->
+        <div class="clock-row" id="ny-row">
+          <div class="label">
+            <div class="location-name">New York</div>
+            <div class="time-info">
+              <span class="dst-indicator">EDT (UTC-4)</span>
+              <span class="digital-clock" id="ny-time"></span>
+              <span class="time-difference" id="ny-diff"></span>
+            </div>
+            <div class="date-display" id="ny-date"></div>
+          </div>
+          <div class="timeline" id="ny-timeline">
+            <div class="day-night" id="ny-daynight"></div>
+            <div class="hour">12<div class="hour-label">AM</div></div>
+            <div class="hour">1</div><div class="hour">2</div>
+            <div class="hour">3</div><div class="hour">4</div><div class="hour">5</div>
+            <div class="hour">6<div class="hour-label">AM</div></div>
+            <div class="hour">7</div><div class="hour">8</div>
+            <div class="hour">9</div><div class="hour">10</div><div class="hour">11</div>
+            <div class="hour">12<div class="hour-label">PM</div></div>
+            <div class="time-indicator" id="ny-indicator">
+              <div class="indicator-circle"></div>
+              <div class="time-arrow" id="ny-arrow"></div>
+            </div>
+          </div>
+          <div class="analog-clock" id="ny-analog">
+            <div class="analog-hour" id="ny-hour"></div>
+            <div class="analog-minute" id="ny-minute"></div>
+            <div class="analog-second" id="ny-second"></div>
+            <div class="analog-center"></div>
+          </div>
+        </div>
+
+        <!-- India -->
+        <div class="clock-row" id="ist-row">
+          <div class="label">
+            <div class="location-name">Mumbai</div>
+            <div class="time-info">
+              <span class="dst-indicator">IST (UTC+5:30)</span>
+              <span class="digital-clock" id="ist-time"></span>
+              <span class="time-difference" id="ist-diff"></span>
+            </div>
+            <div class="date-display" id="ist-date"></div>
+          </div>
+          <div class="timeline" id="ist-timeline">
+            <div class="day-night" id="ist-daynight"></div>
+            <div class="hour">12<div class="hour-label">AM</div></div>
+            <div class="hour">1</div><div class="hour">2</div>
+            <div class="hour">3</div><div class="hour">4</div><div class="hour">5</div>
+            <div class="hour">6<div class="hour-label">AM</div></div>
+            <div class="hour">7</div><div class="hour">8</div>
+            <div class="hour">9</div><div class="hour">10</div><div class="hour">11</div>
+            <div class="hour">12<div class="hour-label">PM</div></div>
+            <div class="time-indicator" id="ist-indicator">
+              <div class="indicator-circle"></div>
+              <div class="time-arrow" id="ist-arrow"></div>
+            </div>
+          </div>
+          <div class="analog-clock" id="ist-analog">
+            <div class="analog-hour" id="ist-hour"></div>
+            <div class="analog-minute" id="ist-minute"></div>
+            <div class="analog-second" id="ist-second"></div>
+            <div class="analog-center"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="toggle-analog">Show Analog Clocks</button>
+        <button id="refresh-btn">Refresh</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+// Enhanced timezone data with more information
+const zones = {
+  london: {
+    id: 'Europe/London',
+    name: 'London',
+    offset: 'UTC+1',
+    dst: 'BST'
+  },
+  ny: {
+    id: 'America/New_York',
+    name: 'New York',
+    offset: 'UTC-4',
+    dst: 'EDT'
+  },
+  ist: {
+    id: 'Asia/Kolkata',
+    name: 'Mumbai',
+    offset: 'UTC+5:30',
+    dst: 'IST'
+  }
+};
+
+// Cache DOM elements for better performance
+const domElements = {
+  localTimeDisplay: document.getElementById('local-time-display'),
+  lastUpdated: document.getElementById('last-updated'),
+  clocksContainer: document.getElementById('clocks-container')
+};
+
+// Timezone selector functionality
+document.getElementById('add-timezone').addEventListener('click', async function() {
+  const select = document.getElementById('timezone-select');
+  const timezone = select.value;
+  if (!timezone) return;
+  
+  const timezoneName = timezone.split('/')[1].replace('_', ' ');
+  const idPrefix = timezone.split('/').join('-').toLowerCase();
+  
+  // Check if already exists
+  if (document.getElementById(`${idPrefix}-row`)) {
+    alert('This timezone is already displayed');
+    return;
+  }
+  
+  // Add to zones object
+  zones[idPrefix] = {
+    id: timezone,
+    name: timezoneName,
+    offset: '', // Will be filled from API
+    dst: '' // Will be filled from API
+  };
+  
+  // Create new clock row
+  const newRow = document.createElement('div');
+  newRow.className = 'clock-row';
+  newRow.id = `${idPrefix}-row`;
+  newRow.innerHTML = `
+    <div class="label">
+      <div class="location-name">${timezoneName}</div>
+      <div class="time-info">
+        <span class="dst-indicator" id="${idPrefix}-dst"></span>
+        <span class="digital-clock" id="${idPrefix}-time"></span>
+        <span class="time-difference" id="${idPrefix}-diff"></span>
+      </div>
+      <div class="date-display" id="${idPrefix}-date"></div>
+    </div>
+    <div class="timeline" id="${idPrefix}-timeline">
+      <div class="day-night" id="${idPrefix}-daynight"></div>
+      <div class="hour">12<div class="hour-label">AM</div></div>
+      <div class="hour">1</div><div class="hour">2</div>
+      <div class="hour">3</div><div class="hour">4</div><div class="hour">5</div>
+      <div class="hour">6<div class="hour-label">AM</div></div>
+      <div class="hour">7</div><div class="hour">8</div>
+      <div class="hour">9</div><div class="hour">10</div><div class="hour">11</div>
+      <div class="hour">12<div class="hour-label">PM</div></div>
+      <div class="time-indicator" id="${idPrefix}-indicator">
+        <div class="indicator-circle"></div>
+        <div class="time-arrow" id="${idPrefix}-arrow"></div>
+      </div>
+    </div>
+    <div class="analog-clock" id="${idPrefix}-analog">
+      <div class="analog-hour" id="${idPrefix}-hour"></div>
+      <div class="analog-minute" id="${idPrefix}-minute"></div>
+      <div class="analog-second" id="${idPrefix}-second"></div>
+      <div class="analog-center"></div>
+    </div>
+  `;
+  
+  domElements.clocksContainer.appendChild(newRow);
+  
+  // Fetch and display the new timezone
+  await updateTimezoneFromAPI(idPrefix);
+  
+  // Reset selector
+  select.value = '';
+});
+
+// Toggle analog clocks
+document.getElementById('toggle-analog').addEventListener('click', function() {
+  const analogClocks = document.querySelectorAll('.analog-clock');
+  const button = this;
+  
+  analogClocks.forEach(clock => {
+    if (clock.style.display === 'none' || !clock.style.display) {
+      clock.style.display = 'block';
+      button.textContent = 'Hide Analog Clocks';
+    } else {
+      clock.style.display = 'none';
+      button.textContent = 'Show Analog Clocks';
+    }
+  });
+});
+
+// Refresh button
+document.getElementById('refresh-btn').addEventListener('click', function() {
+  updateAllFromAPI();
+});
+
+// Enhanced time fetching with fallback
+async function fetchTime(zone) {
+  try {
+    // Try the API first
+    const response = await fetch(`https://timeapi.io/api/Time/current/zone?timeZone=${zone}`);
+    if (!response.ok) throw new Error('API error');
+    const data = await response.json();
+    const date = new Date(data.dateTime);
+    
+    // Get offset information
+    const offsetMinutes = date.getTimezoneOffset();
+    const offsetHours = Math.abs(Math.floor(offsetMinutes / 60));
+    const offsetMinutesRemainder = Math.abs(offsetMinutes % 60);
+    const offsetSign = offsetMinutes > 0 ? '-' : '+';
+    
+    return {
+      date,
+      offset: `UTC${offsetSign}${offsetHours}${offsetMinutesRemainder ? ':' + offsetMinutesRemainder : ''}`,
+      dst: data.dayLightSavings ? 'DST' : 'STD'
+    };
+  } catch (error) {
+    console.warn('Using fallback time calculation for', zone);
+    // Fallback to local calculation if API fails
+    const now = new Date();
+    const options = { timeZone: zone, hour12: false, hour: '2-digit', minute: '2-digit' };
+    const timeString = now.toLocaleTimeString('en-US', options);
+    const [hours, minutes] = timeString.split(':').map(Number);
+    
+    // Create date object with correct time (date will be local but time will match timezone)
+    const date = new Date();
+    date.setHours(hours, minutes, now.getSeconds());
+    
+    // Calculate offset (approximate)
+    const localHours = now.getHours();
+    const diffHours = (hours - localHours + 24) % 24;
+    const offset = diffHours > 12 ? diffHours - 24 : diffHours;
+    const offsetStr = `UTC${offset >= 0 ? '+' : ''}${offset}`;
+    
+    return {
+      date,
+      offset: offsetStr,
+      dst: '' // Can't determine DST from fallback
+    };
+  }
+}
+
+// Update a single timezone
+async function updateTimezoneFromAPI(idPrefix) {
+  try {
+    const { date, offset, dst } = await fetchTime(zones[idPrefix].id);
+    
+    // Update zones data
+    zones[idPrefix].offset = offset;
+    zones[idPrefix].dst = dst;
+    
+    updateClockUI(idPrefix, date, idPrefix.includes('ist'));
+  } catch (error) {
+    console.error(`Error updating ${idPrefix}:`, error);
+  }
+}
+
+// Enhanced UI update function
+function updateClockUI(idPrefix, dateObj, isIST = false) {
+  const hours = dateObj.getHours();
+  const minutes = dateObj.getMinutes();
+  const seconds = dateObj.getSeconds();
+  
+  // Digital clock display
+  const formatted = dateObj.toLocaleTimeString('en-US', {
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+  });
+  document.getElementById(`${idPrefix}-time`).textContent = formatted;
+  
+  // Date display
+  const dateFormatted = dateObj.toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+  document.getElementById(`${idPrefix}-date`).textContent = dateFormatted;
+  
+  // Timezone/DST info
+  const dstElement = document.getElementById(`${idPrefix}-dst`);
+  if (dstElement) {
+    dstElement.textContent = `${zones[idPrefix].dst} (${zones[idPrefix].offset})`;
+  }
+  
+  // Time difference from local
+  const localDate = new Date();
+  const diffHours = (hours - localDate.getHours() + 24) % 24;
+  const diffText = diffHours === 0 ? '' : 
+    `(${diffHours > 12 ? diffHours - 24 : diffHours} ${Math.abs(diffHours) === 1 ? 'hour' : 'hours'} ${hours > localDate.getHours() ? 'ahead' : 'behind'})`;
+  document.getElementById(`${idPrefix}-diff`).textContent = diffText;
+  
+  // Timeline position calculation
+  const hourWidth = 60; // px
+  const fractionalHour = (hours % 12) + (minutes / 60);
+  let pxOffset = fractionalHour * hourWidth;
+  
+  // IST is +5.5, so we shift red bar half an hour forward to match exact label layout
+  if (isIST) {
+    pxOffset = fractionalHour * hourWidth;
+  }
+  
+  const indicator = document.getElementById(`${idPrefix}-indicator`);
+  indicator.style.left = `${pxOffset}px`;
+  
+  // Time arrow (shows minutes)
+  const arrow = document.getElementById(`${idPrefix}-arrow`);
+  if (arrow) {
+    arrow.style.width = `${hourWidth * (minutes / 60)}px`;
+    arrow.style.transform = `rotate(${seconds * 6}deg)`; // subtle rotation with seconds
+  }
+  
+  // Day/night indicator
+  const dayNight = document.getElementById(`${idPrefix}-daynight`);
+  if (dayNight) {
+    const isDayTime = hours >= 6 && hours < 18;
+    dayNight.style.background = isDayTime ? 
+      'linear-gradient(90deg, #87CEEB, #1E90FF)' : 
+      'linear-gradient(90deg, #00008B, #000000)';
+  }
+  
+  // Analog clock
+  updateAnalogClock(idPrefix, hours, minutes, seconds);
+  
+  // Highlight current hour
+  document.querySelectorAll(`#${idPrefix}-timeline .hour`).forEach((hour, index) => {
+    hour.classList.toggle('highlight', index === Math.floor(fractionalHour));
+  });
+}
+
+// Update analog clock with smooth transitions
+function updateAnalogClock(idPrefix, hours, minutes, seconds) {
+  const hourHand = document.getElementById(`${idPrefix}-hour`);
+  const minuteHand = document.getElementById(`${idPrefix}-minute`);
+  const secondHand = document.getElementById(`${idPrefix}-second`);
+  
+  if (hourHand && minuteHand && secondHand) {
+    const hourDegrees = (hours % 12) * 30 + (minutes / 2);
+    const minuteDegrees = minutes * 6;
+    const secondDegrees = seconds * 6;
+    
+    // Add smooth transition only to hour and minute hands
+    hourHand.style.transition = 'transform 0.5s cubic-bezier(0.4, 2.3, 0.3, 1)';
+    minuteHand.style.transition = 'transform 0.5s cubic-bezier(0.4, 2.3, 0.3, 1)';
+    secondHand.style.transition = 'transform 0.2s cubic-bezier(0.4, 2.3, 0.3, 1)';
+    
+    hourHand.style.transform = `rotate(${hourDegrees}deg)`;
+    minuteHand.style.transform = `rotate(${minuteDegrees}deg)`;
+    secondHand.style.transform = `rotate(${secondDegrees}deg)`;
+  }
+}
+
+// Update all clocks and local time
+async function updateAllFromAPI() {
+  try {
+    const now = new Date();
+    
+    // Update local time display
+    domElements.localTimeDisplay.textContent = now.toLocaleTimeString('en-US', {
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+    });
+    domElements.lastUpdated.textContent = now.toLocaleTimeString();
+    
+    // Update each timezone
+    for (const [idPrefix, zone] of Object.entries(zones)) {
+      await updateTimezoneFromAPI(idPrefix);
+    }
+    
+    // Update session countdowns
+    updateSessionCountdowns();
+  } catch (error) {
+    console.error('Error updating clocks:', error);
+  }
+}
+
+// Countdown for sessions (London: 7-10am, NY: 7-11am local time)
+function updateSessionCountdowns() {
+  const now = new Date();
+
+  const londonTime = new Date(now.toLocaleString("en-US", { timeZone: "Europe/London" }));
+  const nyTime = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
+
+  updateCountdown("london", londonTime, 7, 10);
+  updateCountdown("ny", nyTime, 7, 11);
+}
+
+function updateCountdown(prefix, localDate, sessionStart, sessionEnd) {
+  let countdownText = "";
+  const hour = localDate.getHours();
+  const minute = localDate.getMinutes();
+  const second = localDate.getSeconds();
+  const currentSeconds = hour * 3600 + minute * 60 + second;
+  const startSeconds = sessionStart * 3600;
+  const endSeconds = sessionEnd * 3600;
+
+  if (currentSeconds < startSeconds) {
+    const secondsLeft = startSeconds - currentSeconds;
+    countdownText = `Session starts in ${formatTime(secondsLeft)}`;
+  } else if (currentSeconds < endSeconds) {
+    const secondsLeft = endSeconds - currentSeconds;
+    countdownText = `Session ends in ${formatTime(secondsLeft)}`;
+  } else {
+    // Session closed; show time until next session start (next day)
+    const secondsLeft = (24 * 3600 - currentSeconds) + startSeconds;
+    countdownText = `Session starts in ${formatTime(secondsLeft)}`;
+  }
+
+  let container = document.getElementById(`${prefix}-session-countdown`);
+  if (!container) {
+    const labelDiv = document.querySelector(`#${prefix}-row .label`);
+    container = document.createElement("div");
+    container.id = `${prefix}-session-countdown`;
+    container.style.fontSize = "0.9rem";
+    container.style.color = "#ffcc00";
+    container.style.marginTop = "5px";
+    labelDiv.appendChild(container);
+  }
+  container.textContent = countdownText;
+}
+
+function formatTime(seconds) {
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${hrs > 0 ? hrs + 'h ' : ''}${mins}m ${secs}s`;
+}
+
+function markSessionTimeOnTimeline(prefix, sessionStart, sessionEnd) {
+  const timeline = document.getElementById(`${prefix}-timeline`);
+  const existing = timeline.querySelector('.session-block');
+  if (existing) existing.remove();
+
+  const hourWidth = 61; // px per hour
+  const startLeft = sessionStart * hourWidth;
+  const endLeft = sessionEnd * hourWidth;
+
+  const block = document.createElement("div");
+  block.className = "session-block";
+  block.style.left = `${startLeft}px`;
+  block.style.width = `${endLeft - startLeft}px`;
+
+  timeline.appendChild(block);
+}
+
+// Initialize
+updateAllFromAPI();
+setInterval(updateAllFromAPI, 1000); // Update every second for real-time updates
+
+// Mark sessions visually
+markSessionTimeOnTimeline("london", 7, 10); // 7am - 10am London time
+markSessionTimeOnTimeline("ny", 7, 11);     // 7am - 11am NY time
+</script>
+
+</body>
+</html>
