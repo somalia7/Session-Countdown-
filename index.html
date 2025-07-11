@@ -797,8 +797,8 @@ function updateSessionCountdowns() {
   const londonTime = new Date(now.toLocaleString("en-US", { timeZone: "Europe/London" }));
   const nyTime = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
 
-  updateCountdown("london", londonTime, 7, 10);
-  updateCountdown("ny", nyTime, 7, 11);
+  updateCountdown("london", londonTime, 7, 11);
+  updateCountdown("ny", nyTime, 8, 11);
 }
 
 function updateCountdown(prefix, localDate, sessionStart, sessionEnd) {
